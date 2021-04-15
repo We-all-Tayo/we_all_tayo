@@ -1,0 +1,10 @@
+__pycache__
+data
+input
+checkpoints
+venv
+.env
+
+*.png
+*.jpg
+*.jpeg
