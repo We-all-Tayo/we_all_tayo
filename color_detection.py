@@ -35,9 +35,11 @@ def calculate_area(mask, image):
     
     return result
 
-def detect_color(image_path):
+def detect_color(image_path, leftup=None, rightdown=None):
     # Get image and convert BGR color space to HSV color space
     image = cv2.imread(image_path)
+    if leftup != None and rightdown != None:
+         image = image[leftup[1]: rightdown[1], leftup[0]: rightdown[0]]
     hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
     # Define masks for each color
