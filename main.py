@@ -12,7 +12,7 @@ from tensorflow.python.saved_model import tag_constants
 import matplotlib.pyplot as plt
 import core.utils as utils
 
-MODEL_PATH = './yolov4-416'
+MODEL_PATH = './checkpoints/yolov4-416'
 IOU_THRESHOLD = 0.45
 SCORE_THRESHOLD = 0.25
 INPUT_SIZE = 416
