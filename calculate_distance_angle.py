@@ -2,10 +2,10 @@ import math
 import numpy as np
 
 # real size & distance
-REAL_DISTANCE = 247.6
-REAL_HEIGHT = 85.60
-REAL_WIDTH = 53.98
-REAL_DIAGONAL = math.sqrt(math.pow(REAL_HEIGHT, 2) + math.pow(REAL_WIDTH, 2))
+REAL_DISTANCE = 2370.0
+REAL_HEIGHT = 2000.0
+REAL_WIDTH = 1970.0
+REAL_DIAGONAL = 2807.294070809113
 
 
 # 두 포인트 사이의 거리를 반환
@@ -50,13 +50,13 @@ def convert_points(p1, p4, radian):
 
 
 def calculate_distance_angle(p1, p4, radian):
-    # INIT
-    p1 = np.array((303, 359))
-    p2 = np.array((476, 360))
-    p3 = np.array((301, 642))
-    p4 = np.array((477, 643))
-    points = [p1, p2, p3, p4]
-    print("p: ", points)
+    # INIT from blue3.jpg
+    init_p1 = np.array((1949, 613))
+    init_p2 = np.array((3045, 645))
+    init_p3 = np.array((1880, 2649))
+    init_p4 = np.array((2984, 2695))
+    points = [init_p1, init_p2, init_p3, init_p4]
+    print("INIT Points : ", points)
 
     height = calculate_height(points)
     width = calculate_width(points)
@@ -70,13 +70,10 @@ def calculate_distance_angle(p1, p4, radian):
 
     new_points = convert_points(p1, p4, radian)
     new_height = calculate_height(new_points)
-    # new_width = calculate_width(new_points)
-    # new_diagonal = calculate_diagonal(new_points)
     distance = calculate_distance(alpha_mean, new_height, REAL_HEIGHT)
 
     # 이미지에서의 중심점
-    # TODO: IMAGE_WIDTH, IMAGE_HEIGHT
-    size_center = np.array((384, 512))
+    size_center = np.array((2016, 1512))
     # 물체의 중심점 추출
     object_center = calculate_center(new_points)
     # 중심점 거리 계산
@@ -85,3 +82,4 @@ def calculate_distance_angle(p1, p4, radian):
 
     print("distance: ", distance, " angle: ", angle)
     return distance, angle
+
