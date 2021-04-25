@@ -26,7 +26,7 @@ I Wanna Take a Bus
 ---
 
 ```bash
-$ pip3 install easydict imutils matplotlib numpy==1.19.2 opencv-python pytesseract python-dotenv scipy tensorflow==2.4.1 urllib3
+$ pip3 install easydict imutils matplotlib==3.2 numpy==1.19.2 opencv-python pytesseract python-dotenv scipy tensorflow==2.4.1 urllib3
 ```
 
 - [Google Tesseract OCR](https://github.com/tesseract-ocr/tesseract)
