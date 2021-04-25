@@ -26,6 +26,6 @@ def detect_angle(img, door):
                 cv2.line(dst, (i[0][0], i[0][1]),
                          (i[0][2], i[0][3]), (0, 0, 255), 2)
 
-    prob_angle = mode(angles)
+    prob_angle = float(mode(angles))
     plt.imshow(dst)
     return prob_angle
