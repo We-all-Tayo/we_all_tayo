@@ -37,8 +37,8 @@ def detect_door(img, leftup, rightdown):
 
     for contour in contours:
         x, y, w, h = cv2.boundingRect(contour)
-        cv2.rectangle(temp_result, pt1=(x, y), pt2=(
-            x + w, y + h), color=(255, 255, 255), thickness=2)
+        cv2.rectangle(temp_result, pt1=(x, y), pt2=(x + w, y + h),
+                      color=(255, 255, 255), thickness=2)
 
         # insert to dict
         contours_dict.append({
@@ -78,8 +78,9 @@ def detect_door(img, leftup, rightdown):
 
     for d in possible_contours:
         #     cv2.drawContours(temp_result, d['contour'], -1, (255, 255, 255))
-        cv2.rectangle(temp_result, pt1=(d['x'], d['y']), pt2=(d['x'] + d['w'], d['y'] + d['h']), color=(255, 255, 255),
-                      thickness=2)
+        cv2.rectangle(temp_result, pt1=(d['x'], d['y']),
+                      pt2=(d['x'] + d['w'], d['y'] + d['h']),
+                      color=(255, 255, 255), thickness=2)
     # print(possible_contours[0])
 
     possible_contours.sort(key=lambda x: x["h"], reverse=True)
@@ -89,11 +90,11 @@ def detect_door(img, leftup, rightdown):
 
     temp_result = np.zeros((height, width, channel), dtype=np.uint8)
     cv2.rectangle(temp_result, pt1=(prob_door['x'], prob_door['y']),
-                  pt2=(prob_door['x'] + prob_door['w'], prob_door['y'] + prob_door['h']), color=(255, 255, 255),
-                  thickness=2)
+                  pt2=(prob_door['x'] + prob_door['w'], prob_door['y'] + prob_door['h']),
+                  color=(255, 255, 255), thickness=2)
 
     cv2.rectangle(img_ori, pt1=(prob_door['x'], prob_door['y']),
-                  pt2=(prob_door['x'] + prob_door['w'], prob_door['y'] + prob_door['h']), color=(255, 255, 255),
-                  thickness=2)
+                  pt2=(prob_door['x'] + prob_door['w'], prob_door['y'] + prob_door['h']),
+                  color=(255, 255, 255), thickness=2)
 
     return prob_door
