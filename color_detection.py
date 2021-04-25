@@ -6,13 +6,13 @@ import numpy as np
 LOWER_HSV = {
     'red': np.array([166, 84, 141], np.uint8),
     'green': np.array([40, 122, 145], np.uint8),
-    'blue': np.array([97, 100, 117], np.uint8),
+    'blue': np.array([100, 122, 117], np.uint8),
     'yellow': np.array([20, 124, 123], np.uint8),
 }
 UPPER_HSV = {
     'red': np.array([186, 255, 255], np.uint8),
     'green': np.array([60, 225, 225], np.uint8),
-    'blue': np.array([140, 255, 255], np.uint8),
+    'blue': np.array([120, 255, 255], np.uint8),
     'yellow': np.array([30, 255, 255], np.uint8),
 }
 
