@@ -31,8 +31,8 @@ def preprocessing(image):
         adaptiveMethod=cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
         thresholdType=cv2.THRESH_BINARY_INV, 
     #값 조정
-        blockSize=19, 
-        C=-9
+        blockSize=99, 
+        C=-1
     )
     img_blurred = cv2.bilateralFilter(img_thresh, -1, 10, 5)
 
@@ -252,10 +252,6 @@ def filter_numbers(len_number, plate_imgs, channel, AREA):
         height, width = plate_imgs[i].shape
         
         contours, _ = cv2.findContours(plate_imgs[i], mode=cv2.RETR_LIST, method=cv2.CHAIN_APPROX_SIMPLE) 
-        temp_result = np.zeros((height,width, channel), dtype=np.uint8)
-        
-        temp = cv2.drawContours(temp_result, contours=contours, contourIdx=-1, color=(255, 255, 255))    
-        temp_result2 = np.zeros((height,width, channel), dtype=np.uint8)
                                 
         rect =[]                     
         for contour in contours:
@@ -270,10 +266,7 @@ def filter_numbers(len_number, plate_imgs, channel, AREA):
             
             rect.append(bound)
             rec_num += 1
-            cv2.rectangle(
-                temp_result2, pt1=(x, y), pt2=(x+w, y+h), 
-                color=(255, 0, 0), thickness=1)
-            
+
         if rec_num >= len_number:
             temp_plate.append(rect)
             possible_plate.append(plate_imgs[i])    
