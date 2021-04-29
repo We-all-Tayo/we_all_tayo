@@ -367,13 +367,10 @@ def detect_number(image, number, leftup, rightdown):
 
         clopped_imgs.append(img_cropped)
     
-    k = 0
     plate_chars = []
     longest_idx, longest_text = -1, 0
     for plate_img in clopped_imgs:
         ocr(plate_img, img_results, plate_chars, i, longest_idx, longest_text)
-
-        k += 1
 
     for i in range(len(plate_chars)):   
         temp = plate_chars[i].find(number)
