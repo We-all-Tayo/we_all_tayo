@@ -61,7 +61,6 @@ def preprocessing(image):
 
 def get_candidates(image, contours_dict, right_x, up_y, max_x, min_area):
     height, width, channel = image.shape
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
     # Candidates
     possible_contours = []
@@ -243,7 +242,7 @@ def plate_images(matched_chars, plate_imgs, plate_infos, img_thresh, width, heig
         'h': int(plate_height)
     })
 
-def filter_numbers(len_number, plate_imgs, channel, AREA):
+def filter_numbers(len_number, plate_imgs, channel, min_area):
     temp_plate = [] 
     possible_plate = []# 너무 작은 박스랑 박스가 4개 이하인 것들을 걸렀음.
 
@@ -259,7 +258,7 @@ def filter_numbers(len_number, plate_imgs, channel, AREA):
         
             ratio = h / w
             area = w * h
-            if ratio < AREA_MIN_RATIO or area < AREA:
+            if ratio < AREA_MIN_RATIO or area < min_area:
                 continue
             
             bound = (x, y, w, h)
@@ -305,23 +304,20 @@ def clustering(i, img_index, len_number,sorted_plate, max_diag):
             index+=1
 
 
-def ocr(plate_img, img_results, plate_chars, i, longest_idx, longest_text):
+def ocr(plate_img, img_results, plate_chars):
     chars = pytesseract.image_to_string(plate_img, lang='kor', config='--psm 10')
     img_results.append(plate_img)
 
     result_chars = ''
-    has_digit = False
+
     for c in chars:
         if ord('가') <= ord(c) <= ord('힣') or c.isdigit():
-            if c.isdigit():
-                has_digit = True
             result_chars += c
     
     print('result chars: ', result_chars)
     plate_chars.append(result_chars)
 
-    if has_digit and len(result_chars) > longest_text:
-        longest_idx = i
+
 
 def detect_number(image, number, leftup, rightdown):
     image = cv2.imread(image)
@@ -346,9 +342,7 @@ def detect_number(image, number, leftup, rightdown):
     img_index = []
     for i in range(len(temp_plate)):
         x_sorted_plate.append(sorted(temp_plate[i],key=lambda rect: rect[0]))
-    for i in range(len(x_sorted_plate)):
-        index =0
-        temp_rec=[]        
+    for i in range(len(x_sorted_plate)):    
         clustering(i, img_index, len_number, x_sorted_plate[i], max_diag)
 
     # Crop the contour of the numbers
@@ -367,13 +361,9 @@ def detect_number(image, number, leftup, rightdown):
 
         clopped_imgs.append(img_cropped)
     
-    k = 0
     plate_chars = []
-    longest_idx, longest_text = -1, 0
     for plate_img in clopped_imgs:
-        ocr(plate_img, img_results, plate_chars, i, longest_idx, longest_text)
-
-        k += 1
+        ocr(plate_img, img_results, plate_chars)
 
     for i in range(len(plate_chars)):   
         temp = plate_chars[i].find(number)
