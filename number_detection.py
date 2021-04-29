@@ -2,7 +2,6 @@ import cv2
 import numpy as np
 import pytesseract
 
-MIN_AREA = 100
 MIN_WIDTH, MIN_HEIGHT = 2, 8
 MIN_RATIO, MAX_RATIO = 0.25, 0.9
 
@@ -12,9 +11,7 @@ MIN_PLATE_RATIO = 0 #3
 MAX_PLATE_RATIO = 10 #10
 
 AREA_MIN_RATIO = 1.3 # 숫자의 비율(숫자 옆에 노이즈 까지 고려해서)
-AREA=300 #크기(작은거 없애려고)
 
-MAX_DIAG = 10
 
 MAX_DIAG_MULTIPLYER = 3# 5
 MAX_ANGLE_DIFF = 12.0 # 12.0
@@ -34,8 +31,8 @@ def preprocessing(image):
         adaptiveMethod=cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
         thresholdType=cv2.THRESH_BINARY_INV, 
     #값 조정
-        blockSize=19, 
-        C=-9
+        blockSize=99, 
+        C=-1
     )
     img_blurred = cv2.bilateralFilter(img_thresh, -1, 10, 5)
 
@@ -46,20 +43,11 @@ def preprocessing(image):
         method=cv2.CHAIN_APPROX_SIMPLE
     )
     
-    temp_result = np.zeros((height, width, channel), dtype=np.uint8)
-    cv2.drawContours(
-        temp_result, contours=contours, contourIdx=-1, color=(255, 255, 255))
-    
     # Contours Box
-    temp_result = np.zeros((height, width, channel), dtype=np.uint8)
     contours_dict = []
     for contour in contours:
         x, y, w, h = cv2.boundingRect(contour)
 
-        cv2.rectangle(
-            temp_result, pt1=(x, y), pt2=(x+w, y+h), 
-            color=(255, 255, 255), thickness=1)
-        
         contours_dict.append({
             'contour': contour,
             'x': x,
@@ -69,10 +57,9 @@ def preprocessing(image):
             'cx': x + (w / 2),
             'cy': y + (h / 2)
         })
-
     return img_thresh, contours_dict
 
-def get_candidates(image, contours_dict, right_x, up_y, max_x):
+def get_candidates(image, contours_dict, right_x, up_y, max_x, min_area):
     height, width, channel = image.shape
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
@@ -84,7 +71,7 @@ def get_candidates(image, contours_dict, right_x, up_y, max_x):
         area = d['w'] * d['h']
         ratio = d['w'] / d['h']
         
-        if area > MIN_AREA \
+        if area > min_area \
                 and d['w'] > MIN_WIDTH and d['h'] > MIN_HEIGHT \
                 and MIN_RATIO < ratio < MAX_RATIO \
                 and d["y"] < up_y \
@@ -92,41 +79,23 @@ def get_candidates(image, contours_dict, right_x, up_y, max_x):
             d['idx'] = cnt
             cnt += 1
             possible_contours.append(d)
-    
-    # visualize possible contours
-    #temp_result = np.zeros((height, width, channel), dtype=np.uint8)
 
-    for d in possible_contours:
-        #cv2.drawContours(temp_result, d['contour'], -1, (255, 255, 255))
-        cv2.rectangle(
-            gray, pt1=(d['x'], d['y']), pt2=(d['x']+d['w'], d['y']+d['h']), 
-            color=(255, 255, 255), thickness=2)
-    
     # Find the contours with the characters
     result_idx = find_chars(possible_contours, possible_contours)
 
     matched_result = []
     for idx_list in result_idx:
         matched_result.append(np.take(possible_contours, idx_list))
-
-    # visualize possible contours
-    temp_result = np.zeros((height, width, channel), dtype=np.uint8)
-    
-    for r in matched_result:
-        for d in r:
-    #         cv2.drawContours(temp_result, d['contour'], -1, (255, 255, 255))
-            cv2.rectangle(
-                temp_result, pt1=(d['x'], d['y']), pt2=(d['x']+d['w'], d['y']+d['h']), ###DEBUG
-                color=(255, 255, 255), thickness=2)
+        
     return matched_result
 
-def calculate_plate_index(contour, plate_min_x, plate_min_y, plate_max_x, plate_max_y):
+def calculate_plate_index(contour, plate_min_x, plate_min_y, plate_max_x, plate_max_y, min_area):
     x, y, w, h = cv2.boundingRect(contour)
     
     area = w * h
     ratio = w / h
 
-    if area > MIN_AREA \
+    if area > min_area \
             and w > MIN_WIDTH and h > MIN_HEIGHT \
             and MIN_RATIO < ratio < MAX_RATIO:
         if x < plate_min_x:
@@ -140,7 +109,7 @@ def calculate_plate_index(contour, plate_min_x, plate_min_y, plate_max_x, plate_
 
     return plate_min_x, plate_min_y, plate_max_x, plate_max_y
 
-def parse_candidate(image, matched_result, img_thresh):
+def parse_candidate(image, matched_result, img_thresh, min_area):
     height, width, channel = image.shape
     plate_imgs = []
     plate_infos = []
@@ -160,7 +129,7 @@ def parse_candidate(image, matched_result, img_thresh):
         plate_max_x, plate_max_y = 0, 0
 
         for contour in contours:
-            plate_min_x, plate_min_y, plate_max_x, plate_max_y = calculate_plate_index(contour, plate_min_x, plate_min_y, plate_max_x, plate_max_y)
+            plate_min_x, plate_min_y, plate_max_x, plate_max_y = calculate_plate_index(contour, plate_min_x, plate_min_y, plate_max_x, plate_max_y,min_area)
                     
         img_result = plate_img[plate_min_y:plate_max_y, plate_min_x:plate_max_x]
         
@@ -274,7 +243,7 @@ def plate_images(matched_chars, plate_imgs, plate_infos, img_thresh, width, heig
         'h': int(plate_height)
     })
 
-def filter_numbers(len_number, plate_imgs, channel):
+def filter_numbers(len_number, plate_imgs, channel, AREA):
     temp_plate = [] 
     possible_plate = []# 너무 작은 박스랑 박스가 4개 이하인 것들을 걸렀음.
 
@@ -283,10 +252,6 @@ def filter_numbers(len_number, plate_imgs, channel):
         height, width = plate_imgs[i].shape
         
         contours, _ = cv2.findContours(plate_imgs[i], mode=cv2.RETR_LIST, method=cv2.CHAIN_APPROX_SIMPLE) 
-        temp_result = np.zeros((height,width, channel), dtype=np.uint8)
-        
-        temp = cv2.drawContours(temp_result, contours=contours, contourIdx=-1, color=(255, 255, 255))    
-        temp_result2 = np.zeros((height,width, channel), dtype=np.uint8)
                                 
         rect =[]                     
         for contour in contours:
@@ -301,42 +266,44 @@ def filter_numbers(len_number, plate_imgs, channel):
             
             rect.append(bound)
             rec_num += 1
-            cv2.rectangle(
-                temp_result2, pt1=(x, y), pt2=(x+w, y+h), 
-                color=(255, 0, 0), thickness=1)
-            
+
         if rec_num >= len_number:
             temp_plate.append(rect)
             possible_plate.append(plate_imgs[i])    
 
     return temp_plate, possible_plate
 
-def clustering(index, temp_rec, i, img_index, len_number, x_sorted_plate):
-    
-    if(index == len(x_sorted_plate[i])-1):
-        diag = - (x_sorted_plate[i][index-1][0]
-            + x_sorted_plate[i][index-1][2] 
-            - x_sorted_plate[i][index][0])
-        if diag <= MAX_DIAG:
-            temp_rec.append(x_sorted_plate[i][index])
-        if len(temp_rec) >= len_number:
-            new_img = {'index':i, 'rec':temp_rec}
-            img_index.append(new_img)
-        return
-    
-    diag = x_sorted_plate[i][index+1][0] - x_sorted_plate[i][index][0] - x_sorted_plate[i][index][2]
 
-    if diag > MAX_DIAG:
-        if len(temp_rec) >= len_number:
-            new_img = {'index':i, 'rec':temp_rec}
-            img_index.append(new_img)
-            
-        new_temp = []
-        clustering(index + 1, new_temp, i, img_index, len_number, x_sorted_plate)
+def clustering(i, img_index, len_number,sorted_plate, max_diag):
+    index=0
+    length=len(sorted_plate)
+    temp_rec=[]
+    
+    while True:
+        if(index == length-1):
+            diag=-(sorted_plate[index][0]+ sorted_plate[index][2]-sorted_plate[index][0])
+            if diag <= max_diag:
+                temp_rec.append(sorted_plate[index])
+            if len(temp_rec)>=len_number:
+                new_img={'index':i, 'rec':temp_rec}
+                img_index.append(new_img)
+            break
         
-    else:
-        temp_rec.append(x_sorted_plate[i][index])
-        clustering(index + 1, temp_rec, i, img_index, len_number, x_sorted_plate)
+        diag=sorted_plate[index+1][0]-(sorted_plate[index][0]+sorted_plate[index][2])
+        
+        if diag > max_diag:
+            temp_rec.append(sorted_plate[index])
+            if len(temp_rec)>=len_number:
+                new_img={'index':i, 'rec':temp_rec}
+                img_index.append(new_img)
+                
+            temp_rec=[]   
+            index+=1
+            
+        else:
+            temp_rec.append(sorted_plate[index])
+            index+=1
+
 
 def ocr(plate_img, img_results, plate_chars, i, longest_idx, longest_text):
     chars = pytesseract.image_to_string(plate_img, lang='kor', config='--psm 10')
@@ -361,28 +328,28 @@ def detect_number(image, number, leftup, rightdown):
     height, width, channel = image.shape
     
     img_thresh, contours_dict = preprocessing(image)
-    
-    right_x = (871-88)*0.1
-    up_y = (527-112)
-    max_x = 871*0.8 #문이 바운더리 밖에 있지는 않으니까
-    # (88, 112) (871, 527)
+    right_x = (rightdown[0]-leftup[0])*0.3
+    up_y = (rightdown[1]-leftup[1])
+    max_x = rightdown[0]*0.8 #문이 바운더리 밖에 있지는 않으니까
+    min_area = int(width*0.1)
+    max_diag = int(min_area*0.1)
 
-    matched_result = get_candidates(image, contours_dict, right_x, up_y, max_x)
-    plate_imgs, img_results = parse_candidate(image, matched_result, img_thresh)
+    matched_result = get_candidates(image, contours_dict, right_x, up_y, max_x, min_area)
+
+    plate_imgs, img_results = parse_candidate(image, matched_result, img_thresh, min_area)
         
     len_number = len(number)
-    temp_plate, possible_plate = filter_numbers(len_number, plate_imgs, channel)
+    temp_plate, possible_plate = filter_numbers(len_number, plate_imgs, channel, min_area)
 
     # Clustering
     x_sorted_plate = []
     img_index = []
     for i in range(len(temp_plate)):
         x_sorted_plate.append(sorted(temp_plate[i],key=lambda rect: rect[0]))
-
     for i in range(len(x_sorted_plate)):
         index =0
         temp_rec=[]        
-        clustering(index, temp_rec, i, img_index, len_number, x_sorted_plate)
+        clustering(i, img_index, len_number, x_sorted_plate[i], max_diag)
 
     # Crop the contour of the numbers
     clopped_imgs=[]
@@ -408,10 +375,10 @@ def detect_number(image, number, leftup, rightdown):
 
         k += 1
 
-    for i in plate_chars:    
-        temp = i.find(number)
+    for i in range(len(plate_chars)):   
+        temp = plate_chars[i].find(number)
+        
         if temp != -1:
-            print(i[temp:len_number+1])
+            print(plate_chars[i][temp:len_number+1])
             return True
-        else:
-            return False
+    return False
