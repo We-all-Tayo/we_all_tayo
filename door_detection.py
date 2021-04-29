@@ -53,8 +53,8 @@ def detect_door(img, leftup, rightdown):
     MIN_AREA = 80
     MIN_WIDTH, MIN_HEIGHT = 4, 16
     MIN_RATIO, MAX_RATIO = 0.01, 0.5
-    RIGHT_X = (rightdown[0] - leftup[0]) / 2
-    MAX_X = rightdown[0] * 0.8  # 문이 바운더리 밖에 있지는 않으니까
+    # RIGHT_X = (rightdown[0] - leftup[0]) / 2
+    # MAX_X = rightdown[0] * 0.8  # 문이 바운더리 밖에 있지는 않으니까
 
     possible_contours = []
 
@@ -65,8 +65,8 @@ def detect_door(img, leftup, rightdown):
 
         if area > MIN_AREA \
                 and d['w'] > MIN_WIDTH and d['h'] > MIN_HEIGHT \
-                and MIN_RATIO < ratio < MAX_RATIO \
-                and MAX_X > d["x"] > RIGHT_X:
+                and MIN_RATIO < ratio < MAX_RATIO:
+                # and MAX_X > d["x"] > RIGHT_X:
             d['idx'] = cnt
             cnt += 1
             possible_contours.append(d)
