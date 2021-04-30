@@ -39,7 +39,9 @@ def calculate_center(points):
 
 
 # 두 꼭지점과 각도로 네 좌표 생성
-def convert_points(p1, p4, radian):
+def convert_points(door, radian):
+    p1 = np.array((door["x"], door["y"]))
+    p4 = np.array((door["x"] + door["w"], door["y"] + door["h"]))
     p2 = np.array((p4[0], p1[1]))
     p3 = np.array((p1[0], p4[1]))
     points = [p1, p2, p3, p4]
@@ -49,14 +51,14 @@ def convert_points(p1, p4, radian):
     return points
 
 
-def calculate_distance_angle(p1, p4, radian):
+def calculate_distance_angle(door, radian):
     # INIT from blue3.jpg
     init_p1 = np.array((1949, 613))
     init_p2 = np.array((3045, 645))
     init_p3 = np.array((1880, 2649))
     init_p4 = np.array((2984, 2695))
     points = [init_p1, init_p2, init_p3, init_p4]
-    #print("INIT Points : ", points)
+    # print("INIT Points : ", points)
 
     height = calculate_height(points)
     width = calculate_width(points)
@@ -68,7 +70,7 @@ def calculate_distance_angle(p1, p4, radian):
     alpha_diagonal = (diagonal * REAL_DISTANCE) / REAL_DIAGONAL
     alpha_mean = (alpha_width + alpha_hegith + alpha_diagonal) / 3
 
-    new_points = convert_points(p1, p4, radian)
+    new_points = convert_points(door, radian)
     new_height = calculate_height(new_points)
     distance = calculate_distance(alpha_mean, new_height, REAL_HEIGHT)
 
@@ -80,6 +82,6 @@ def calculate_distance_angle(p1, p4, radian):
     mid_width = euclidean(size_center, object_center)
     angle = math.atan(mid_width / distance)
 
-    #print("distance: ", distance, " angle: ", angle)
+    # print("distance: ", distance, " angle: ", angle)
     return distance, angle
 
