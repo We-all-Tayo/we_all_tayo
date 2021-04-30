@@ -56,7 +56,7 @@ def calculate_distance_angle(p1, p4, radian):
     init_p3 = np.array((1880, 2649))
     init_p4 = np.array((2984, 2695))
     points = [init_p1, init_p2, init_p3, init_p4]
-    print("INIT Points : ", points)
+    #print("INIT Points : ", points)
 
     height = calculate_height(points)
     width = calculate_width(points)
@@ -80,6 +80,6 @@ def calculate_distance_angle(p1, p4, radian):
     mid_width = euclidean(size_center, object_center)
     angle = math.atan(mid_width / distance)
 
-    print("distance: ", distance, " angle: ", angle)
+    #print("distance: ", distance, " angle: ", angle)
     return distance, angle
 
