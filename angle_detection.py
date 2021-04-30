@@ -3,11 +3,10 @@ import cv2
 import numpy as np
 import statistics
 
-def detect_angle(img, door):
-    src = cv2.imread(img)
-    dst = src.copy()
-    height, _, _ = src.shape
-    gray = cv2.cvtColor(src, cv2.COLOR_BGR2GRAY)
+def detect_angle(image_path, door):
+    image = cv2.imread(image_path)
+    height, _, _ = image.shape
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     canny = cv2.Canny(gray, 5000, 1500, apertureSize=5, L2gradient=True)
     lines = cv2.HoughLinesP(canny, 0.8, np.pi / 180, 90,
                             minLineLength=10, maxLineGap=100)
@@ -21,7 +20,5 @@ def detect_angle(img, door):
             angle = math.atan((line[0][0] - line[0][2]) / (line[0][3] - line[0][1]))
             if 0 < angle < (np.pi * 180 / 4):
                 angles.append(round(angle, 2))
-                cv2.line(dst, (line[0][0], line[0][1]), (line[0][2], line[0][3]),
-                         (0, 0, 255), 2)
 
     return statistics.mode(angles)
