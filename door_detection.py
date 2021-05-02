@@ -6,7 +6,7 @@ def detect_door(img, leftup, rightdown):
     img_ori = cv2.imread(img)
     gray = cv2.cvtColor(img_ori, cv2.COLOR_BGR2GRAY)
 
-    height, width, channel = img_ori.shape
+    height, width, _ = img_ori.shape
     img_blurred = cv2.GaussianBlur(gray, ksize=(5, 5), sigmaX=0)
 
     img_thresh = cv2.adaptiveThreshold(
@@ -28,7 +28,6 @@ def detect_door(img, leftup, rightdown):
     for contour in contours:
         x, y, w, h = cv2.boundingRect(contour)
 
-        # insert to dict
         contours_dict.append({
             'contour': contour,
             'x': x,
