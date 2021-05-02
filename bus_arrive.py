@@ -19,12 +19,12 @@ def get_bus_dict(target_station):
     response_body = urlopen(request).read()
 
     tree = ET.fromstring(response_body)
-    bus_dict = tree.find('msgBody').findall('itemList')
+    bus_list = tree.find('msgBody').findall('itemList')
 
     bus_come = {}
-    for bus in bus_dict:
+    for bus in bus_list:
         #NOTE routeType: (1:공항, 2:마을, 3:간선, 4:지선,
-        #  5:순환, 6:광역, 7:인천, 8:경기, 9:폐지, 0:공용)
+        # 5:순환, 6:광역, 7:인천, 8:경기, 9:폐지, 0:공용)
         if (bus.find('arrmsg1').text == '곧 도착'):
             bus_come[bus.find("rtNm").text] = bus.find("routeType").text
         
