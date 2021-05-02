@@ -1,6 +1,4 @@
 import cv2
-import numpy as np
-import pytesseract
 
 MIN_RATIO, MAX_RATIO = 0.01, 0.5
 

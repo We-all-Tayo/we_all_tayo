@@ -59,7 +59,7 @@ def main(target_bus, target_station, img_path):
     door = detect_door(img_path, leftup, rightdown)
 
     # Angle Detection
-    radian = detect_angle(img_path, door)
+    radian = detect_angle(img_path)
 
     # Calculation
     distance, angle = calculate_distance_angle(door, radian)

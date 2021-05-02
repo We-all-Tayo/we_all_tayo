@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 import statistics
 
-def detect_angle(image_path, door):
+def detect_angle(image_path):
     image = cv2.imread(image_path)
     height, _, _ = image.shape
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
