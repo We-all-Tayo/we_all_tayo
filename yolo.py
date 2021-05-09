@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import tensorflow as tf
-import core.utils as utils
+# import core.utils as utils
 
 IOU_THRESHOLD = 0.45
 SCORE_THRESHOLD = 0.25
@@ -48,12 +48,9 @@ def yolo(infer, img_path):
     bus_place[1] *= width
     bus_place[3] *= width
 
-    pred_bbox = [boxes.numpy(), scores.numpy(), classes.numpy(), valid_detections.numpy()]
-
-    result = utils.draw_bbox(img, pred_bbox)
-    result = cv2.cvtColor(np.array(result), cv2.COLOR_RGB2BGR)
-
-    height, width, channel = img.shape
+    # pred_bbox = [boxes.numpy(), scores.numpy(), classes.numpy(), valid_detections.numpy()]
+    # result = utils.draw_bbox(img, pred_bbox)
+    # result = cv2.cvtColor(np.array(result), cv2.COLOR_RGB2BGR)
 
     leftup = (int(bus_place[1]), int(bus_place[0]))
     rightdown = (int(bus_place[3]), int(bus_place[2]))
