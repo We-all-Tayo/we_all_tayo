@@ -11,7 +11,7 @@ LOWER_HSV = {
 }
 UPPER_HSV = {
     'red': np.array([186, 255, 255], np.uint8),
-    'green': np.array([60, 225, 225], np.uint8),
+    'green': np.array([70, 225, 225], np.uint8),
     'blue': np.array([120, 255, 255], np.uint8),
     'yellow': np.array([30, 255, 255], np.uint8),
 }
