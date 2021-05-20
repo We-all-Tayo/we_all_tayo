@@ -10,11 +10,11 @@ import numpy as np
 ################################################################################
 #XXX Assume the input data as...
 
-target_bus = '370'
-target_station = '04001'
-input_image = './input/bus370.png'
-leftup = (111, 56)
-rightdown = (1058, 721)
+target_bus = '4211'
+target_station = '23322'
+input_image = './input/bus4211.jpg'
+leftup = (963, 127)
+rightdown = (3383, 1799)
 ################################################################################
 #XXX TEST CODES -- bus_arrive.get_bus_list
 
@@ -26,7 +26,7 @@ else:
 #XXX TEST CODES -- color_detection.detect_color
 
 # Red : 6 광역 | Green: 4 지선 | Blue: 3 간선 | Yellow: 5 순환
-print('bus type:', detect_color(input_image))
+print('bus type:', detect_color(input_image, leftup=leftup, rightdown=rightdown))
 ################################################################################
 #XXX TEST CODES -- number_detection.detect_number
 
@@ -37,18 +37,22 @@ else:
 ################################################################################
 #XXX TEST CODES -- door_detection.detect_door
 
-print('door output:')
 door = detect_door(input_image, leftup, rightdown)
+print('door output:', door)
 ################################################################################
 #XXX TEST CODES -- angle_detection.detect_angle
 
-radian = detect_angle(input_image, door)
+radian = detect_angle(input_image)
 print('detected angle:', radian)
 ################################################################################
 #XXX TEST CODES -- calculate_distance_angle.calculate_distance_angle
 
-p1 = np.array((door['x'], door['y']))
-p4 = np.array((door['x']+door['w'], door['y']+door['h']))
-distance, angle = calculate_distance_angle(p1, p4, radian)
-print(distance, angle)
+distance, angle = calculate_distance_angle(door, radian)
+print('calculate:', distance, angle)
 ################################################################################
+#XXX RESULT VALUES
+
+print(
+    str(round(distance / 1000, 2)) + " meter",
+    str(round(angle * 180 / np.pi)) + " 도",
+)
