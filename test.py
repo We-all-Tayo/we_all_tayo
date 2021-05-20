@@ -1,4 +1,4 @@
-from bus_arrive import get_bus_list
+from bus_arrive import get_bus_dict
 from color_detection import detect_color
 from number_detection import detect_number
 from door_detection import detect_door
@@ -18,7 +18,7 @@ rightdown = (1058, 721)
 ################################################################################
 #XXX TEST CODES -- bus_arrive.get_bus_list
 
-if target_bus in get_bus_list(target_station):
+if target_bus in get_bus_dict(target_station):
     print(target_bus, 'is comming...')
 else:
     print(target_bus, 'is NOT comming...')
