@@ -39,7 +39,7 @@ def yolo(infer, img_path):
     for i in range(len(classes)):
         for j in range(len(classes[i])):
             # class 5 : bus
-            if classes[i][j] == 5:
+            if classes[i][j] == 0:
                 bus_place += boxes[i][j].numpy()
 
     # (y0, x0, y1, x1)
