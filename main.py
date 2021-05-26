@@ -11,6 +11,14 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.python.saved_model import tag_constants
 
+
+#gpu 사용시 해제해주세요.
+# gpus = tf.config.experimental.list_physical_devices('GPU')
+# for gpu in gpus:
+#     tf.config.experimental.set_memory_growth(gpu, True)
+
+
+
 MODEL_PATH = "./checkpoints/yolov4-416"
 
 
