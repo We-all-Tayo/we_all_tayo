@@ -46,8 +46,8 @@ def convert_points(door, radian):
     p3 = np.array((p1[0], p4[1]))
     points = [p1, p2, p3, p4]
     width = calculate_width(points)
-    points[0][1] += math.tan(radian) * width
-    points[2][1] -= math.tan(radian) * width
+    points[0][1] += math.tan(np.pi/2 - radian) * width
+    points[2][1] -= math.tan(np.pi/2 - radian) * width
     return points
 
 
@@ -80,7 +80,7 @@ def calculate_distance_angle(door, radian):
     object_center = calculate_center(new_points)
     # 중심점 거리 계산
     mid_width = euclidean(size_center, object_center)
-    angle = math.atan(mid_width / distance)
+    angle = math.asin(mid_width / distance)
 
     # print("distance: ", distance, " angle: ", angle)
     return distance, angle
