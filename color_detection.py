@@ -16,47 +16,48 @@ UPPER_HSV = {
     'yellow': np.array([30, 255, 255], np.uint8),
 }
 
-def calculate_area(image, image_area, color):
-    result = 0
-    kernal = np.ones((5, 5), 'uint8')
+class ColorDetection:
+    def calculate_area(self, image, image_area, color):
+        result = 0
+        kernal = np.ones((5, 5), 'uint8')
 
-    # Convert BGR color space to HSV color space
-    hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+        # Convert BGR color space to HSV color space
+        hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
-    # Define masks for each color
-    mask = cv2.inRange(hsv_image,
-        LOWER_HSV[color], UPPER_HSV[color])
+        # Define masks for each color
+        mask = cv2.inRange(hsv_image,
+            LOWER_HSV[color], UPPER_HSV[color])
 
-    # Create contour
-    mask = cv2.dilate(mask, kernal)
-    cv2.bitwise_and(image, image, mask=mask)
-    contours, _ = cv2.findContours(
-        mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        # Create contour
+        mask = cv2.dilate(mask, kernal)
+        cv2.bitwise_and(image, image, mask=mask)
+        contours, _ = cv2.findContours(
+            mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-    # Track color
-    for contour in contours:
-        area = cv2.contourArea(contour)
-        if (area > image_area * 0.001):
-            _, _, w, h = cv2.boundingRect(contour)
-            result += w*h
-    
-    return result
+        # Track color
+        for contour in contours:
+            area = cv2.contourArea(contour)
+            if (area > image_area * 0.001):
+                _, _, w, h = cv2.boundingRect(contour)
+                result += w*h
+        
+        return result
 
-def detect_color(image_path, leftup=None, rightdown=None):
-    # Get image
-    image = cv2.imread(image_path)
-    if leftup != None and rightdown != None:
-         image = image[leftup[1]: rightdown[1], leftup[0]: rightdown[0]]
+    def detect_color(self, image_path, leftup=None, rightdown=None):
+        # Get image
+        image = cv2.imread(image_path)
+        if leftup != None and rightdown != None:
+            image = image[leftup[1]: rightdown[1], leftup[0]: rightdown[0]]
 
-    height, width, _ = image.shape
-    image_area = height * width
+        height, width, _ = image.shape
+        image_area = height * width
 
-    # Calcuate color areas
-    red_area = calculate_area(image, image_area, 'red')
-    green_area = calculate_area(image, image_area, 'green')
-    blue_area = calculate_area(image, image_area, 'blue')
-    yellow_area = calculate_area(image, image_area, 'yellow')
+        # Calcuate color areas
+        red_area = self.calculate_area(image, image_area, 'red')
+        green_area = self.calculate_area(image, image_area, 'green')
+        blue_area = self.calculate_area(image, image_area, 'blue')
+        yellow_area = self.calculate_area(image, image_area, 'yellow')
 
-    # Red : 6 광역 | Green: 4 지선 | Blue: 3 간선 | Yellow: 5 순환
-    areas = {'6': red_area, '4': green_area, '3': blue_area, '5': yellow_area}
-    return max(areas, key=lambda x : areas[x])
+        # Red : 6 광역 | Green: 4 지선 | Blue: 3 간선 | Yellow: 5 순환
+        areas = {'6': red_area, '4': green_area, '3': blue_area, '5': yellow_area}
+        return max(areas, key=lambda x : areas[x])

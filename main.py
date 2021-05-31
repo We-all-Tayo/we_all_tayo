@@ -1,11 +1,11 @@
-from bus_arrive import get_bus_dict
-from color_detection import detect_color
-from number_detection import detect_number
-from routenumber_detection import detect_routenumber
-from door_detection import detect_door
-from angle_detection import detect_angle
-from calculate_distance_angle import calculate_distance_angle
-from yolo import yolo
+from bus_arrive import BusArrive
+from color_detection import ColorDetection
+from number_detection import NumberDetection
+from routenumber_detection import RouteNumberDetection
+from door_detection import DoorDetection
+from angle_detection import AngleDetection
+from calculate_distance_angle import Calculator
+from yolo import Yolo
 
 import cv2
 import numpy as np
@@ -28,8 +28,17 @@ def main(target_bus, target_station, img_path):
     saved_model_loaded = tf.saved_model.load(MODEL_PATH, tags=[tag_constants.SERVING])
     infer = saved_model_loaded.signatures["serving_default"]
 
+    bus_arrive = BusArrive()
+    color_detection = ColorDetection()
+    number_detection = NumberDetection()
+    route_number_detection = RouteNumberDetection()
+    door_detection = DoorDetection()
+    angle_detection = AngleDetection()
+    calculator = Calculator()
+    yolo = Yolo()
+
     # call 공공API
-    # bus_dict = get_bus_dict(target_station)
+    #bus_dict = bus_arrive.get_bus_dict(target_station)
     bus_dict = {
         # 3번이 파란색
         "370": ("3", None),
@@ -52,24 +61,24 @@ def main(target_bus, target_station, img_path):
             diff_color += 1
 
     # YOLO
-    bus_leftup, bus_rightdown, door_dict, route_number_leftup, route_number_rightdown, bus_number_leftup, bus_number_rightdown = yolo(infer, img_path)
+    bus_leftup, bus_rightdown, door_dict, route_number_leftup, route_number_rightdown, bus_number_leftup, bus_number_rightdown = yolo.yolo(infer, img_path)
 
     if diff_color > 0:
-        detected_color = detect_color(img_path, leftup=bus_leftup, rightdown=bus_rightdown)
+        detected_color = color_detection.detect_color(img_path, leftup=bus_leftup, rightdown=bus_rightdown)
         if detected_color != target_color:
             return "Unexpected Color"
 
     plain_no = plain_no[-4:]
     print("plain_no", plain_no)
-    if same_color > 1 and (detect_number(img_path, plain_no, bus_number_leftup, bus_number_rightdown) == False \
-                and detect_routenumber(img_path, target_bus,route_number_leftup, route_number_rightdown) == False):
+    if same_color > 1 and (number_detection.detect_number(img_path, plain_no, bus_number_leftup, bus_number_rightdown) == False \
+                and route_number_detection.detect_routenumber(img_path, target_bus,route_number_leftup, route_number_rightdown) == False):
         return "Unexpected Number"
 
     # Door Detection OpenCV
-    door = detect_door(img_path, bus_leftup, bus_rightdown)
+    door = door_detection.detect_door(img_path, bus_leftup, bus_rightdown)
 
     # Angle Detection
-    radian = detect_angle(img_path, bus_leftup, bus_rightdown)
+    radian = angle_detection.detect_angle(img_path, bus_leftup, bus_rightdown)
 
     door_union = {}
     door_union["x"] = min(door['x'], door_dict['x'])
@@ -88,10 +97,10 @@ def main(target_bus, target_station, img_path):
     door_intersect["h"] = door_intersect["down_y"] - door_intersect["y"]
 
     # Calculation
-    distance1, angle1 = calculate_distance_angle(door, radian, img_path)  # opencv
-    distance2, angle2 = calculate_distance_angle(door_dict, radian, img_path)  # yolo
-    distance3, angle3 = calculate_distance_angle(door_union, radian, img_path)  # opencv + yolo union
-    distance4, angle4 = calculate_distance_angle(door_intersect, radian, img_path)  # opencv + yolo intersect
+    distance1, angle1 = calculator.calculate_distance_angle(door, radian, img_path)  # opencv
+    distance2, angle2 = calculator.calculate_distance_angle(door_dict, radian, img_path)  # yolo
+    distance3, angle3 = calculator.calculate_distance_angle(door_union, radian, img_path)  # opencv + yolo union
+    distance4, angle4 = calculator.calculate_distance_angle(door_intersect, radian, img_path)  # opencv + yolo intersect
 
     # img = cv2.imread(img_path)
     # img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -122,7 +131,8 @@ def main(target_bus, target_station, img_path):
         str(round(angle1 * 180 / np.pi)) + " 도",
     )
 
-print(
-    "RESULT:",
-    main(target_bus="4211", target_station="23322", img_path="./input/bus4211.jpg"),
-)
+if __name__ == '__main__':
+    print(
+        "RESULT:",
+        main(target_bus="4211", target_station="23322", img_path="./input/bus4211.jpg"),
+    )
