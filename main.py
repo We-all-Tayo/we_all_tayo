@@ -68,7 +68,7 @@ def main(target_bus, target_station, img_path):
     door = detect_door(img_path, bus_leftup, bus_rightdown)
 
     # Angle Detection
-    radian = detect_angle(img_path)
+    radian = detect_angle(img_path, bus_leftup, bus_rightdown)
 
     door_union = {}
     door_union["x"] = min(door['x'], door_dict['x'])
