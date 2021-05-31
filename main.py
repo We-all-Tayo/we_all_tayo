@@ -84,10 +84,10 @@ def main(target_bus, target_station, img_path):
     door_intersect["h"] = door_intersect["down_y"] - door_intersect["y"]
 
     # Calculation
-    distance1, angle1 = calculate_distance_angle(door, radian)  # opencv
-    distance2, angle2 = calculate_distance_angle(door_dict, radian)  # yolo
-    distance3, angle3 = calculate_distance_angle(door_union, radian)  # opencv + yolo union
-    distance4, angle4 = calculate_distance_angle(door_intersect, radian)  # opencv + yolo intersect
+    distance1, angle1 = calculate_distance_angle(door, radian, img_path)  # opencv
+    distance2, angle2 = calculate_distance_angle(door_dict, radian, img_path)  # yolo
+    distance3, angle3 = calculate_distance_angle(door_union, radian, img_path)  # opencv + yolo union
+    distance4, angle4 = calculate_distance_angle(door_intersect, radian, img_path)  # opencv + yolo intersect
 
     # img = cv2.imread(img_path)
     # img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)

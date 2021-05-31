@@ -38,16 +38,16 @@ else:
 #XXX TEST CODES -- door_detection.detect_door
 
 door = detect_door(input_image, leftup, rightdown)
-print('door output:', door)
+#print('door output:', door)
 ################################################################################
 #XXX TEST CODES -- angle_detection.detect_angle
 
-radian = detect_angle(input_image)
+radian = detect_angle(input_image, leftup, rightdown)
 print('detected angle:', radian)
 ################################################################################
 #XXX TEST CODES -- calculate_distance_angle.calculate_distance_angle
 
-distance, angle = calculate_distance_angle(door, radian)
+distance, angle = calculate_distance_angle(door, radian, input_image)
 print('calculate:', distance, angle)
 ################################################################################
 #XXX RESULT VALUES

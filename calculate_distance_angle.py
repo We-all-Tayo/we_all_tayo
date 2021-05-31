@@ -1,5 +1,6 @@
 import math
 import numpy as np
+import cv2
 
 # real size & distance
 REAL_DISTANCE = 2370.0
@@ -51,7 +52,7 @@ def convert_points(door, radian):
     return points
 
 
-def calculate_distance_angle(door, radian):
+def calculate_distance_angle(door, radian, image_path):
     # INIT from blue3.jpg
     init_p1 = np.array((1949, 613))
     init_p2 = np.array((3045, 645))
@@ -70,16 +71,24 @@ def calculate_distance_angle(door, radian):
     alpha_diagonal = (diagonal * REAL_DISTANCE) / REAL_DIAGONAL
     alpha_mean = (alpha_width + alpha_hegith + alpha_diagonal) / 3
 
+    image = cv2.imread(image_path)
+    image_height, image_width, _ = image.shape
+
     new_points = convert_points(door, radian)
     new_height = calculate_height(new_points)
     distance = calculate_distance(alpha_mean, new_height, REAL_HEIGHT)
 
     # 이미지에서의 중심점
-    size_center = np.array((2016, 1512))
+    size_center = np.array((image_width / 2, image_height / 2))
     # 물체의 중심점 추출
     object_center = calculate_center(new_points)
     # 중심점 거리 계산
+
     mid_width = euclidean(size_center, object_center)
+    print('image center', size_center[0], 'object center', object_center[0])
+    if size_center[0] > object_center[0]:
+        mid_width *= -1
+
     angle = math.asin(mid_width / distance)
 
     # print("distance: ", distance, " angle: ", angle)
