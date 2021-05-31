@@ -6,7 +6,6 @@ import statistics
 
 def detect_angle(image_path, bus_leftup, bus_rightdown):
     image = cv2.imread(image_path)
-    height, width, _ = image.shape
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     canny = cv2.Canny(gray, 5000, 1500, apertureSize=5, L2gradient=True)
 
