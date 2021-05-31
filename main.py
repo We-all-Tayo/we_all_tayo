@@ -1,6 +1,7 @@
 from bus_arrive import get_bus_dict
 from color_detection import detect_color
 from number_detection import detect_number
+from routenumber_detection import detect_routenumber
 from door_detection import detect_door
 from angle_detection import detect_angle
 from calculate_distance_angle import calculate_distance_angle
@@ -12,7 +13,7 @@ import tensorflow as tf
 from tensorflow.python.saved_model import tag_constants
 
 
-#gpu 사용시 해제해주세요.
+# gpu 사용시 해제해주세요.
 # gpus = tf.config.experimental.list_physical_devices('GPU')
 # for gpu in gpus:
 #     tf.config.experimental.set_memory_growth(gpu, True)
@@ -34,7 +35,7 @@ def main(target_bus, target_station, img_path):
         "370": ("3", None),
         "7212": ("4", None),
         "642": ("3", None),
-        "4211": ("4", None),
+        "4211": ("4", "서울 74사 4226"),
     }
 
     if target_bus not in bus_dict:
@@ -44,7 +45,7 @@ def main(target_bus, target_station, img_path):
 
     same_color = 0
     diff_color = 0
-    for route, color in bus_dict.items():
+    for route, (color, _) in bus_dict.items():
         if color == target_color:
             same_color += 1
         else:
@@ -58,7 +59,10 @@ def main(target_bus, target_station, img_path):
         if detected_color != target_color:
             return "Unexpected Color"
 
-    if same_color > 1 and detect_number(img_path, target_bus, bus_number_leftup, bus_number_rightdown) == False:
+    plain_no = plain_no[-4:]
+    print("plain_no", plain_no)
+    if same_color > 1 and (detect_number(img_path, plain_no, bus_number_leftup, bus_number_rightdown) == False \
+                and detect_routenumber(img_path, target_bus,route_number_leftup, route_number_rightdown) == False):
         return "Unexpected Number"
 
     # Door Detection OpenCV
@@ -122,4 +126,3 @@ print(
     "RESULT:",
     main(target_bus="4211", target_station="23322", img_path="./input/bus4211.jpg"),
 )
-

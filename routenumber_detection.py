@@ -18,7 +18,23 @@ PLATE_HEIGHT_PADDING = 1.1 # 1.5
 MIN_PLATE_RATIO = 1
 MAX_PLATE_RATIO = 3
 
-def preprocessing(image, leftup, rightdown):
+def mark_img(image, blue_threshold=100, green_threshold=100, red_threshold=100): # 흰색 차선 찾기
+    mark = np.copy(image)
+    #  BGR 제한 값
+    bgr_threshold = [blue_threshold, green_threshold, red_threshold]
+
+    # BGR 제한 값보다 작으면 검은색으로
+    thresholds = (image[:,:,0] > bgr_threshold[0]) \
+                | (image[:,:,1] > bgr_threshold[1]) \
+                | (image[:,:,2] > bgr_threshold[2])
+    mark[thresholds] = [0,0,0]
+    thresholds = (image[:,:,0] <bgr_threshold[0]) \
+            | (image[:,:,1] < bgr_threshold[1]) \
+            | (image[:,:,2] < bgr_threshold[2])
+    mark[thresholds] = [255,255,255]
+    return mark
+
+def preprocessing(image, leftup, rightdown, color):
     plate_width, plate_height = rightdown[0] - leftup[0], rightdown[1] - leftup[1]
     plate_cx, plate_cy = (rightdown[0] + leftup[0])/2, (rightdown[1] + leftup[1])/2
 
@@ -27,20 +43,13 @@ def preprocessing(image, leftup, rightdown):
     patchSize=(int(plate_width), int(plate_height)), 
     center=(int(plate_cx), int(plate_cy))
     )
-    gray = cv2.cvtColor(croped_img, cv2.COLOR_BGR2GRAY)
+    mark = mark_img(croped_img, color, color, color)
+
+    gray = cv2.cvtColor(mark, cv2.COLOR_BGR2GRAY)
     img_blurred = cv2.GaussianBlur(gray, ksize=(5, 5), sigmaX=0)
 
-    img_thresh = cv2.adaptiveThreshold(
-        img_blurred, 
-        maxValue=255.0, 
-        adaptiveMethod=cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
-        thresholdType=cv2.THRESH_BINARY_INV, 
-        blockSize=19, 
-        C=9
-    )
-
     contours, _  = cv2.findContours(
-    img_thresh, 
+    img_blurred, 
     mode=cv2.RETR_LIST, 
     method=cv2.CHAIN_APPROX_SIMPLE
     )
@@ -61,7 +70,7 @@ def preprocessing(image, leftup, rightdown):
             'cy': y + (h / 2)
         })
 
-    return img_thresh, contours_dict
+    return img_blurred, contours_dict
 
 def find_chars(possible_contours, contour_list):
 
@@ -230,24 +239,27 @@ def parse_candidate(plate_imgs):
 
     return img_results
     
-def detect_number(image, number, leftup, rightdown):
+def detect_routenumber(image, number, leftup, rightdown):
     image = cv2.imread(image)
     width, height,_ = image.shape
-    img_thresh, contours_dict = preprocessing(image, leftup, rightdown)
-    matched_result = get_candidates(contours_dict)
-    plate_imgs = plate_images(matched_result,img_thresh, width, height)
+    plate_imgs = []
+    color_list = (50, 100, 150)
+    for i in color_list:
+        img_thresh, contours_dict = preprocessing(image, leftup, rightdown, i)
+        matched_result = get_candidates(contours_dict)
+        plate_imgs.extend(plate_images(matched_result,img_thresh, width, height))
+
     img_results = parse_candidate(plate_imgs)
     
     plate_chars = []
     for img_result in img_results:
         chars = pytesseract.image_to_string(img_result, lang = 'kor' ,config='--psm 8')
-
         result_chars = ''
         for c in chars:
             if ord('가') <= ord(c) <= ord('힣') or c.isdigit():
                 result_chars += c
         plate_chars.append(result_chars)
-    
+
     for i in range(len(plate_chars)):   
         temp = plate_chars[i].find(number)
         
