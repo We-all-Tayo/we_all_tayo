@@ -28,19 +28,20 @@ def main(target_bus, target_station, img_path):
     infer = saved_model_loaded.signatures["serving_default"]
 
     # call 공공API
-    # XXX bus_dict = get_bus_dict(target_station)
-    bus_dict = {
-        # 3번이 파란색
-        "370": "3",
-        "7212": "4",
-        "642": "3",
-        "4211": "4",
-    }
+    bus_dict = get_bus_dict(target_station)
+    #bus_dict = {
+    #     # 3번이 파란색
+    #     "370": "3",
+    #     "7212": "4",
+    #     "642": "3",
+    #     "4211": "4",
+    # }
 
     if target_bus not in bus_dict:
         return "Target bus is not comming."
 
-    target_color = bus_dict[target_bus]
+    target_color, plain_no = bus_dict[target_bus]
+
     same_color = 0
     diff_color = 0
     for route, color in bus_dict.items():
