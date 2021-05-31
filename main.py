@@ -58,10 +58,7 @@ def main(target_bus, target_station, img_path):
         if detected_color != target_color:
             return "Unexpected Color"
 
-    if (
-        same_color > 1
-        and detect_number(img_path, target_bus, bus_leftup, bus_rightdown) == False
-    ):
+    if same_color > 1 and detect_number(img_path, target_bus, bus_number_leftup, bus_number_rightdown) == False:
         return "Unexpected Number"
 
     # Door Detection OpenCV
