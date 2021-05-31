@@ -19,7 +19,7 @@ from tensorflow.python.saved_model import tag_constants
 
 
 
-MODEL_PATH = "./checkpoints/yolov4-416"
+MODEL_PATH = "./checkpoints/yolov4-last"
 
 
 def main(target_bus, target_station, img_path):
@@ -51,21 +51,21 @@ def main(target_bus, target_station, img_path):
             diff_color += 1
 
     # YOLO
-    leftup, rightdown = yolo(infer, img_path)
+    bus_leftup, bus_rightdown, door_dict, route_number_leftup, route_number_rightdown, bus_number_leftup, bus_number_rightdown = yolo(infer, img_path)
 
     if diff_color > 0:
-        detected_color = detect_color(img_path, leftup=leftup, rightdown=rightdown)
+        detected_color = detect_color(img_path, leftup=bus_leftup, rightdown=bus_rightdown)
         if detected_color != target_color:
             return "Unexpected Color"
 
     if (
         same_color > 1
-        and detect_number(img_path, target_bus, leftup, rightdown) == False
+        and detect_number(img_path, target_bus, bus_leftup, bus_rightdown) == False
     ):
         return "Unexpected Number"
 
-    # Door Detection
-    door = detect_door(img_path, leftup, rightdown)
+    # Door Detection OpenCV
+    door = detect_door(img_path, bus_leftup, bus_rightdown)
 
     # Angle Detection
     radian = detect_angle(img_path)
