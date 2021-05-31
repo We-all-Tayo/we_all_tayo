@@ -28,14 +28,14 @@ def main(target_bus, target_station, img_path):
     infer = saved_model_loaded.signatures["serving_default"]
 
     # call 공공API
-    bus_dict = get_bus_dict(target_station)
-    #bus_dict = {
-    #     # 3번이 파란색
-    #     "370": "3",
-    #     "7212": "4",
-    #     "642": "3",
-    #     "4211": "4",
-    # }
+    # bus_dict = get_bus_dict(target_station)
+    bus_dict = {
+        # 3번이 파란색
+        "370": ("3", None),
+        "7212": ("4", None),
+        "642": ("3", None),
+        "4211": ("4", None),
+    }
 
     if target_bus not in bus_dict:
         return "Target bus is not comming."
@@ -92,20 +92,20 @@ def main(target_bus, target_station, img_path):
     distance3, angle3 = calculate_distance_angle(door_union, radian)  # opencv + yolo union
     distance4, angle4 = calculate_distance_angle(door_intersect, radian)  # opencv + yolo intersect
 
-    img = cv2.imread(img_path)
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    cv2.rectangle(img, (door['x'], door['y']), (door['x'] + door['w'], door['y'] + door['h']), color=(255, 0, 0),
-                  thickness=5)  # blue
-    cv2.rectangle(img, (door_dict['x'], door_dict['y']),
-                  (door_dict['x'] + door_dict['w'], door_dict['y'] + door_dict['h']), color=(0, 255, 0),
-                  thickness=5)  # green
-    cv2.rectangle(img, (door_union['x'], door_union['y']),
-                  (door_union['x'] + door_union['w'], door_union['y'] + door_union['h']), color=(0, 0, 255),
-                  thickness=5)  # red
-    cv2.rectangle(img, (door_intersect['x'], door_intersect['y']),
-                  (door_intersect['x'] + door_intersect['w'], door_intersect['y'] + door_intersect['h']),
-                  color=(255, 0, 255), thickness=5)  # pink
-    cv2.imwrite("test.png", img)
+    # img = cv2.imread(img_path)
+    # img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    # cv2.rectangle(img, (door['x'], door['y']), (door['x'] + door['w'], door['y'] + door['h']), color=(255, 0, 0),
+    #               thickness=5)  # blue
+    # cv2.rectangle(img, (door_dict['x'], door_dict['y']),
+    #               (door_dict['x'] + door_dict['w'], door_dict['y'] + door_dict['h']), color=(0, 255, 0),
+    #               thickness=5)  # green
+    # cv2.rectangle(img, (door_union['x'], door_union['y']),
+    #               (door_union['x'] + door_union['w'], door_union['y'] + door_union['h']), color=(0, 0, 255),
+    #               thickness=5)  # red
+    # cv2.rectangle(img, (door_intersect['x'], door_intersect['y']),
+    #               (door_intersect['x'] + door_intersect['w'], door_intersect['y'] + door_intersect['h']),
+    #               color=(255, 0, 255), thickness=5)  # pink
+    # cv2.imwrite("test.png", img)
 
     print(str(round(distance1 / 1000, 2)) + " meter")
     print(str(round(angle1 * 180 / np.pi)) + " 도")
@@ -117,8 +117,8 @@ def main(target_bus, target_station, img_path):
     print(str(round(angle4 * 180 / np.pi)) + " 도")
 
     return (
-        str(round(distance / 1000, 2)) + " meter",
-        str(round(angle * 180 / np.pi)) + " 도",
+        str(round(distance1 / 1000, 2)) + " meter",
+        str(round(angle1 * 180 / np.pi)) + " 도",
     )
 
 print(

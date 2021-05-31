@@ -1,11 +1,13 @@
 import cv2
 import numpy as np
 import tensorflow as tf
+
 # import core.utils as utils
 
 IOU_THRESHOLD = 0.45
 SCORE_THRESHOLD = 0.25
 INPUT_SIZE = 416
+
 
 def yolo(infer, img_path):
     img = cv2.imread(img_path)
@@ -34,25 +36,68 @@ def yolo(infer, img_path):
         score_threshold=SCORE_THRESHOLD
     )
 
-    bus_place = np.zeros(4)
+    bus_place, bus_area = [], []
+    door_place, door_area = [], []
+    route_number_place, route_number_area = [], []
+    bus_number_place, bus_number_area = [], []
 
     for i in range(len(classes)):
         for j in range(len(classes[i])):
-            # class 5 : bus
-            if classes[i][j] == 0:
-                bus_place += boxes[i][j].numpy()
+            # classess 0 : bus, 1: bus door, 2: route number, 3: bus number
+            if classes[i][j] == 0 and scores[i][j] >= 0.9:
+                bus = boxes[i][j].numpy()
+                bus_place.append(bus)
+                bus_area.append((bus[3] - bus[1]) * (bus[2] - bus[0]))
+            elif classes[i][j] == 1 and scores[i][j] >= 0.9:
+                door = boxes[i][j].numpy()
+                door_place.append(door)
+                door_area.append((door[3] - door[1]) * (door[2] - door[0]))
+            elif classes[i][j] == 2 and scores[i][j] >= 0.9:
+                route_number = boxes[i][j].numpy()
+                route_number_place.append(route_number)
+                route_number_area.append((route_number[3] - route_number[1]) * (route_number[2] - route_number[0]))
+            elif classes[i][j] == 3 and scores[i][j] >= 0.9:
+                bus_number = boxes[i][j].numpy()
+                bus_number_place.append(bus_number)
+                bus_number_area.append((bus_number[3] - bus_number[1]) * (bus_number[2] - bus_number[0]))
+
+    bus_index = bus_area.index(max(bus_area))
+    door_index = door_area.index(max(door_area))
+    route_number_index = route_number_area.index(max(route_number_area))
+    bus_number_index = bus_number_area.index(max(bus_number_area))
 
     # (y0, x0, y1, x1)
-    bus_place[0] *= height
-    bus_place[2] *= height
-    bus_place[1] *= width
-    bus_place[3] *= width
+    bus_place[bus_index][0] *= height
+    bus_place[bus_index][2] *= height
+    bus_place[bus_index][1] *= width
+    bus_place[bus_index][3] *= width
 
-    # pred_bbox = [boxes.numpy(), scores.numpy(), classes.numpy(), valid_detections.numpy()]
-    # result = utils.draw_bbox(img, pred_bbox)
-    # result = cv2.cvtColor(np.array(result), cv2.COLOR_RGB2BGR)
+    door_place[door_index][0] *= height
+    door_place[door_index][2] *= height
+    door_place[door_index][1] *= width
+    door_place[door_index][3] *= width
 
-    leftup = (int(bus_place[1]), int(bus_place[0]))
-    rightdown = (int(bus_place[3]), int(bus_place[2]))
+    route_number_place[route_number_index][0] *= height
+    route_number_place[route_number_index][2] *= height
+    route_number_place[route_number_index][1] *= width
+    route_number_place[route_number_index][3] *= width
 
-    return leftup, rightdown
+    bus_number_place[bus_number_index][0] *= height
+    bus_number_place[bus_number_index][2] *= height
+    bus_number_place[bus_number_index][1] *= width
+    bus_number_place[bus_number_index][3] *= width
+
+    bus_leftup = (int(bus_place[bus_index][1]), int(bus_place[bus_index][0]))
+    bus_rightdown = (int(bus_place[bus_index][3]), int(bus_place[bus_index][2]))
+    route_number_leftup = (int(route_number_place[route_number_index][1]), int(route_number_place[route_number_index][0]))
+    route_number_rightdown = (int(route_number_place[route_number_index][3]), int(route_number_place[route_number_index][2]))
+    bus_number_leftup = (int(bus_number_place[bus_number_index][1]), int(bus_number_place[bus_number_index][0]))
+    bus_number_rightdown = (int(bus_number_place[bus_number_index][3]), int(bus_number_place[bus_number_index][2]))
+
+    door = {}
+    door["x"] = int(door_place[door_index][1])
+    door["y"] = int(door_place[door_index][0])
+    door["w"] = int(door_place[door_index][3]) - int(door_place[door_index][1])
+    door["h"] = int(door_place[door_index][2]) - int(door_place[door_index][0])
+
+    return bus_leftup, bus_rightdown, door, route_number_leftup, route_number_rightdown, bus_number_leftup, bus_number_rightdown
