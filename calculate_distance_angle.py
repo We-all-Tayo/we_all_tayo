@@ -7,6 +7,7 @@ REAL_DISTANCE = 2370.0
 REAL_HEIGHT = 2000.0
 REAL_WIDTH = 1060.0
 REAL_DIAGONAL = 2263.53705514
+CORRECTION = 1.2
 
 class Calculator:
     def __init__(self):
@@ -22,9 +23,9 @@ class Calculator:
 
         # get alpha
         alpha_width = (width * REAL_DISTANCE) / REAL_WIDTH
-        alpha_hegith = (height * REAL_DISTANCE) / REAL_HEIGHT
+        alpha_height = (height * REAL_DISTANCE) / REAL_HEIGHT
         alpha_diagonal = (diagonal * REAL_DISTANCE) / REAL_DIAGONAL
-        self.alpha_mean = (alpha_width + alpha_hegith + alpha_diagonal) / 3
+        self.alpha_mean = (alpha_width + alpha_height + alpha_diagonal) / 3 * CORRECTION
 
     # 두 포인트 사이의 거리를 반환
     def euclidean(self, p1, p2):
