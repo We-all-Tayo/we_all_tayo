@@ -7,7 +7,7 @@ from angle_detection import AngleDetection
 from calculate_distance_angle import Calculator
 from yolo import Yolo
 
-import cv2
+#import cv2
 import numpy as np
 import tensorflow as tf
 from tensorflow.python.saved_model import tag_constants

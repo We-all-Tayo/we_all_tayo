@@ -1,5 +1,5 @@
-#NOTE pip install opencv-python imutils numpy
-import cv2, imutils
+#NOTE pip install opencv-python numpy
+import cv2
 import numpy as np
 
 # color boundaries
