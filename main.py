@@ -35,7 +35,7 @@ def main(target_bus, target_station, img_path):
     door_detection = DoorDetection()
     angle_detection = AngleDetection()
     calculator = Calculator()
-    yolo = Yolo()
+    yolo = Yolo(infer)
 
     # call 공공API
     #bus_dict = bus_arrive.get_bus_dict(target_station)
@@ -61,7 +61,7 @@ def main(target_bus, target_station, img_path):
             diff_color += 1
 
     # YOLO
-    bus_leftup, bus_rightdown, door_dict, route_number_leftup, route_number_rightdown, bus_number_leftup, bus_number_rightdown = yolo.yolo(infer, img_path)
+    bus_leftup, bus_rightdown, door_dict, route_number_leftup, route_number_rightdown, bus_number_leftup, bus_number_rightdown = yolo.yolo(img_path)
 
     if diff_color > 0:
         detected_color = color_detection.detect_color(img_path, leftup=bus_leftup, rightdown=bus_rightdown)

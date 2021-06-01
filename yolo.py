@@ -9,7 +9,10 @@ SCORE_THRESHOLD = 0.25
 INPUT_SIZE = 416
 
 class Yolo:
-    def yolo(self, infer, img_path):
+    def __init__(self, infer):
+        self.infer = infer
+
+    def yolo(self, img_path):
         img = cv2.imread(img_path)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         height, width, channel = img.shape
@@ -19,7 +22,7 @@ class Yolo:
         img_input = img_input[np.newaxis, ...].astype(np.float32)
         img_input = tf.constant(img_input)
 
-        pred_bbox = infer(img_input)
+        pred_bbox = self.infer(img_input)
 
         for key, value in pred_bbox.items():
             boxes = value[:, :, 0:4]
