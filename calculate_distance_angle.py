@@ -5,8 +5,8 @@ import cv2
 # real size & distance
 REAL_DISTANCE = 2370.0
 REAL_HEIGHT = 2000.0
-REAL_WIDTH = 1970.0
-REAL_DIAGONAL = 2807.294070809113
+REAL_WIDTH = 1060.0
+REAL_DIAGONAL = 2263.53705514
 
 class Calculator:
     def __init__(self):
