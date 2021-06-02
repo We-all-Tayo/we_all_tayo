@@ -10,6 +10,7 @@ REAL_DIAGONAL = 2263.53705514
 CORRECTION = 1.2
 
 class Calculator:
+
     def __init__(self):
         init_p1 = np.array((1949, 613))
         init_p2 = np.array((3045, 645))
@@ -17,44 +18,15 @@ class Calculator:
         init_p4 = np.array((2984, 2695))
         points = [init_p1, init_p2, init_p3, init_p4]
 
-        height = self.calculate_height(points)
-        width = self.calculate_width(points)
-        diagonal = self.calculate_diagonal(points)
+        height = (np.linalg.norm(points[0] - points[2]) + np.linalg.norm(points[1] - points[3])) / 2
+        width = (np.linalg.norm(points[0] - points[1]) + np.linalg.norm(points[2] - points[3])) / 2
+        diagonal = (np.linalg.norm(points[0] - points[3]) + np.linalg.norm(points[1] - points[2])) / 2
 
         # get alpha
-        alpha_width = (width * REAL_DISTANCE) / REAL_WIDTH
-        alpha_height = (height * REAL_DISTANCE) / REAL_HEIGHT
-        alpha_diagonal = (diagonal * REAL_DISTANCE) / REAL_DIAGONAL
+        alpha_width = width * REAL_DISTANCE / REAL_WIDTH
+        alpha_height = height * REAL_DISTANCE / REAL_HEIGHT
+        alpha_diagonal = diagonal * REAL_DISTANCE / REAL_DIAGONAL
         self.alpha_mean = (alpha_width + alpha_height + alpha_diagonal) / 3 * CORRECTION
-
-    # 두 포인트 사이의 거리를 반환
-    def euclidean(self, p1, p2):
-        return np.linalg.norm(p1 - p2)
-
-
-    # 세로 길이의 평균 반환
-    def calculate_height(self, points):
-        return (self.euclidean(points[0], points[2]) + self.euclidean(points[1], points[3])) / 2
-
-
-    # 가로 길이의 평균 반환
-    def calculate_width(self, points):
-        return (self.euclidean(points[0], points[1]) + self.euclidean(points[2], points[3])) / 2
-
-
-    # 대각선 길이의 평균 반환
-    def calculate_diagonal(self, points):
-        return (self.euclidean(points[0], points[3]) + self.euclidean(points[1], points[2])) / 2
-
-
-    # 물체와 카메라가 떨어진 거리 계산
-    def calculate_distance(self, alpha, size, real_size):
-        return (alpha * real_size) / size
-
-
-    # 물체의 중심점을 계산
-    def calculate_center(self, points):
-        return (points[0] + points[1] + points[2] + points[3]) / 4
 
 
     # 두 꼭지점과 각도로 네 좌표 생성
@@ -65,10 +37,9 @@ class Calculator:
         p3 = np.array((p1[0], p4[1]))
 
         points = [p1, p2, p3, p4]
-        width = self.calculate_width(points)
-        
-        points[0][1] += math.tan(np.pi/2 - radian) * width
-        points[2][1] -= math.tan(np.pi/2 - radian) * width
+
+        points[0][1] += math.tan(np.pi/2 - radian) * door["w"]
+        points[2][1] -= math.tan(np.pi/2 - radian) * door["w"]
         return points
 
 
@@ -77,16 +48,15 @@ class Calculator:
         image_height, image_width, _ = image.shape
 
         new_points = self.convert_points(door, radian)
-        new_height = self.calculate_height(new_points)
-        distance = self.calculate_distance(self.alpha_mean, new_height, REAL_HEIGHT)
+        new_height = (np.linalg.norm(new_points[0] - new_points[2]) + np.linalg.norm(new_points[1] - new_points[3])) / 2
+        distance = (self.alpha_mean * REAL_HEIGHT) / new_height
 
         # 이미지에서의 중심점
         size_center = np.array((image_width / 2, image_height / 2))
         # 물체의 중심점 추출
-        object_center = self.calculate_center(new_points)
+        object_center = (new_points[0] + new_points[1] + new_points[2] + new_points[3]) / 4
         # 중심점 거리 계산
-
-        mid_width = self.euclidean(size_center, object_center)
+        mid_width = np.linalg.norm(size_center - object_center)
         print('image center', size_center[0], 'object center', object_center[0])
         if size_center[0] > object_center[0]:
             mid_width *= -1
